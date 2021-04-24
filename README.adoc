@@ -1,4 +1,21 @@
 Adventure Generator
 ===================
 
+Introduction
+------------
+
 A Java utility to generate random texts from a set of data files.
+Useful for tabletop roleplaying games.
+
+
+Build
+-----
+
+Prerequisites:
+
+* Java 11
+* Maven 3
+
+----
+mvn package
+----
