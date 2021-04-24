@@ -1,0 +1,4 @@
+Adventure Generator
+===================
+
+A Java utility to generate random texts from a set of data files.
