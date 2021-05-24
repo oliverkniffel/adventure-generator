@@ -41,8 +41,13 @@ public class AdventureGenerator {
       return result;
     } else if (element instanceof GenreTable) {
       GenreTable genreTable = (GenreTable) element;
-      String tableEntryExpression = genreTable.getEntries().get(random.nextInt(genreTable.getEntries().size()));
-      return this.evaluateExpression(genre, tableEntryExpression);
+      int roll = random.nextInt(genreTable.getMaxRoll()) + 1;
+      for (GenreTableEntry entry : genreTable.getEntries()) {
+        if (roll >= entry.getMinRoll() && roll <= entry.getMaxRoll()) {
+          return this.evaluateExpression(genre, entry.getText());
+        }
+      }
+      throw new IllegalStateException("Failed to get entry from genre table.");
     } else {
       throw new IllegalStateException("Genre element of unknown type as input. " + element.getClass().getName());
     }
