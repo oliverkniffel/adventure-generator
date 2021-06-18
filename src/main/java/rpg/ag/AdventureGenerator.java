@@ -4,29 +4,45 @@
 package rpg.ag;
 
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AdventureGenerator {
 
-  private Random random;
+  private DiceRoller dice;
+  private Pattern dicePattern = Pattern.compile("^(\\d+)D(\\d+)$", Pattern.CASE_INSENSITIVE);
 
   public AdventureGenerator() {
-    this.setRandom(new Random());
+    this.setDice(new DiceRoller(new Random()));
+  }
+
+  public void setDice(DiceRoller dice) {
+    if (dice == null) {
+      throw new IllegalArgumentException("Property 'dice' cannot be null.");
+    }
+    this.dice = dice;
   }
 
   public void setRandom(Random random) {
-    if (random == null) {
-      throw new IllegalArgumentException("Property 'random' cannot be null.");
-    }
-    this.random = random;
+    this.dice.setRandom(random);
   }
 
   public Generated generate(Genre genre, String elementName) {
     if (genre == null) {
       throw new IllegalArgumentException("Genre parameter cannot be null.");
     }
+
     if (elementName == null || elementName.trim().length() == 0) {
       throw new IllegalArgumentException("Element name parameter cannot be null or blank.");
     }
+
+    Matcher diceMatcher = dicePattern.matcher(elementName);
+    if (diceMatcher.find()) {
+      int number = Integer.parseInt(diceMatcher.group(1));
+      int type = Integer.parseInt(diceMatcher.group(2));
+      return new GeneratedText(Integer.toString(dice.roll(number, type)));
+    }
+
     GenreElement element = genre.getElement(elementName).orElseThrow(() -> new IllegalArgumentException("Unknown genre element " + elementName));
     return generate(genre, element);
   }
@@ -41,7 +57,7 @@ public class AdventureGenerator {
       return result;
     } else if (element instanceof GenreTable) {
       GenreTable genreTable = (GenreTable) element;
-      int roll = random.nextInt(genreTable.getMaxRoll()) + 1;
+      int roll = dice.roll(1, genreTable.getMaxRoll());
       for (GenreTableEntry entry : genreTable.getEntries()) {
         if (roll >= entry.getMinRoll() && roll <= entry.getMaxRoll()) {
           return this.evaluateExpression(genre, entry.getText());

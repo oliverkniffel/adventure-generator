@@ -1,3 +1,4 @@
 Mission;{ mission }
 Location;{ location }
 Patron;{ npc }
+Payment;{ 3d20 } gold pieces
