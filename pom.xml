@@ -5,7 +5,7 @@
 
 	<groupId>de.oliverkniffel</groupId>
 	<artifactId>adventure-generator</artifactId>
-	<version>0.0.4-SNAPSHOT</version>
+	<version>0.1-SNAPSHOT</version>
 
 	<properties>
 		<project.scm.id>github</project.scm.id>
