@@ -3,12 +3,9 @@
  */
 package rpg.ag;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -16,33 +13,35 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class AdventureGeneratorTest {
 
+  private AdventureGenerator testedObj;
+
   @Mock
   private DiceRoller dice;
 
-  @InjectMocks
-  private AdventureGenerator tested = new AdventureGenerator();
+  public Genre prepareGenre() {
+    final Genre genre = new Genre();
+    genre.addElement("table", prepageGenreTable());
+    return genre;
+  }
 
-  @ParameterizedTest
-  // @formatter:off
-  @CsvSource({ 
-    "2d6, 2, 6, 7, 7", 
-    "1D100, 1, 100, 55, 55", 
-    "1d6+3, 1, 6, 3, 6", 
-    "1d6-6, 1, 6, 3, -3", 
-    "1d6*4, 1, 6, 3, 12", 
-    "1d6/2, 1, 6, 6, 3", 
-    "1d6/2, 1, 6, 3, 2", 
-    "1d6/3, 1, 6, 5, 2" 
-  })
-  // @formatter:on
-  void testGenerateDiceRoll(String expression, int number, int type, int roll, String expected) {
-    Mockito.when(dice.roll(number, type)).thenReturn(Integer.valueOf(roll));
+  public GenreTable prepageGenreTable() {
+    final GenreTable genreTable = new GenreTable();
+    genreTable.addEntry(1, 1, "Entry 1");
+    genreTable.addEntry(2, 2, "Entry 2");
+    return genreTable;
+  }
+
+  @Test
+  void generate() {
+    // Given
+    Mockito.when(dice.roll(Mockito.anyInt(), Mockito.anyInt())).thenReturn(1);
+    this.testedObj = new AdventureGenerator(this.dice);
+    final Genre genre = prepareGenre();
 
     // When
-    GeneratedText result = (GeneratedText) tested.generateDiceRoll(expression).get();
+    Generated generated = this.testedObj.generate(genre, "table");
 
-    // Then
-    Mockito.verify(dice).roll(number, type);
-    assertEquals(expected, result.getText());
+    Assertions.assertNotNull(generated);
+    Assertions.assertTrue(generated instanceof GeneratedText);
   }
 }

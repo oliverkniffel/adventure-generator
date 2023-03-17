@@ -5,27 +5,20 @@ package rpg.ag;
 
 import java.util.Optional;
 import java.util.Random;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class AdventureGenerator {
 
-  private DiceRoller dice;
-  private Pattern dicePattern = Pattern.compile("^(\\d+)D(\\d+)([\\+\\-\\*\\/]\\d+)*$", Pattern.CASE_INSENSITIVE);
+  private final DiceRoller dice;
+  private final DiceRollGenerator diceRollGenerator;
 
   public AdventureGenerator() {
-    this.setDice(new DiceRoller(new Random()));
+    this.dice = new DiceRoller(new Random());
+    this.diceRollGenerator = new DiceRollGenerator(this.dice);
   }
 
-  public void setDice(DiceRoller dice) {
-    if (dice == null) {
-      throw new IllegalArgumentException("Property 'dice' cannot be null.");
-    }
+  public AdventureGenerator(final DiceRoller dice) {
     this.dice = dice;
-  }
-
-  public void setRandom(Random random) {
-    this.dice.setRandom(random);
+    this.diceRollGenerator = new DiceRollGenerator(dice);
   }
 
   public Generated generate(Genre genre, String elementName) {
@@ -37,47 +30,13 @@ public class AdventureGenerator {
       throw new IllegalArgumentException("Element name parameter cannot be null or blank.");
     }
 
-    Optional<Generated> generatedDiceRollOptional = generateDiceRoll(elementName);
+    Optional<Generated> generatedDiceRollOptional = diceRollGenerator.generateDiceRoll(elementName);
     if (generatedDiceRollOptional.isPresent()) {
       return generatedDiceRollOptional.get();
     }
 
     GenreElement element = genre.getElement(elementName).orElseThrow(() -> new IllegalArgumentException("Unknown genre element " + elementName));
     return generate(genre, element);
-  }
-
-  public Optional<Generated> generateDiceRoll(String expression) {
-    Matcher diceMatcher = dicePattern.matcher(expression);
-    if (diceMatcher.find()) {
-      int number = Integer.parseInt(diceMatcher.group(1));
-      int type = Integer.parseInt(diceMatcher.group(2));
-      int roll = dice.roll(number, type);
-
-      String modifier = diceMatcher.group(3);
-      if (modifier != null) {
-
-        switch (modifier.charAt(0)) {
-        case '+':
-          roll += Integer.parseInt(modifier.substring(1));
-          break;
-        case '-':
-          roll -= Integer.parseInt(modifier.substring(1));
-          break;
-        case '*':
-          roll *= Integer.parseInt(modifier.substring(1));
-          break;
-        case '/':
-          roll = (int) Math.round(1.0 * roll / Integer.parseInt(modifier.substring(1)));
-          break;
-        default:
-          throw new IllegalArgumentException("Invalid dice expression: " + expression);
-        }
-      }
-
-      return Optional.of(new GeneratedText(Integer.toString(roll)));
-    }
-
-    return Optional.empty();
   }
 
   private Generated generate(Genre genre, GenreElement element) {
