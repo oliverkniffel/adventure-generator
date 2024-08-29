@@ -1,15 +1,14 @@
-Adventure Generator
-===================
+= Adventure Generator
 
-Introduction
-------------
+== Introduction
 
 A Java utility to generate random texts from a set of data files.
 Useful for tabletop roleplaying games.
 
 
-Build
------
+== Getting started
+
+=== Build
 
 Prerequisites:
 
@@ -18,4 +17,16 @@ Prerequisites:
 
 ----
 mvn package
+----
+
+=== Run
+
+----
+java -jar target/adventure-generator.jar <data_dir> <element-name>
+----
+
+For example
+
+----
+java -jar target/adventure-generator.jar src/test/data/fantasy adventure
 ----
